@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
-import { Button, Form, Input, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, message, Select } from 'antd';
 import supabase from '../../config/supabaseClient';
 
+const { Option } = Select;
+
+type Company = {
+  id: number;
+  nom: string;
+};
+type Category = {
+  id: number;
+  name: string;
+};
+
 export default function CreatePost() {
+  const allcategories: Category[] = [
+    { id: 1, name: 'Technology' },
+    { id: 2, name: 'Health' },
+    { id: 3, name: 'Finance' },
+    // Add more categories as needed
+  ];
   const [form] = Form.useForm();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>(allcategories);
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   const formItemLayout = {
     labelCol: {
@@ -63,6 +82,21 @@ export default function CreatePost() {
     }
   };
 
+  const fetchCompanies = async () => {
+    const { data, error } = await supabase
+      .from('company')
+      .select('id, nom');
+    if (error) {
+      console.log(error);
+    } else {
+      setCompanies(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
   return (
     <div className="flex flex-col mx-auto rounded-lg shadow-lg w-1/2 my-3 border-2 px-2">
       <Form
@@ -90,9 +124,15 @@ export default function CreatePost() {
         <Form.Item
           label="Category"
           name="category"
-          rules={[{ required: true, message: 'Please input the category!' }]}
+          rules={[{ required: true, message: 'Please select a category!' }]}
         >
-          <Input />
+          <Select placeholder="Select a category" style={{ width: '100%' }}>
+            {categories.map((category) => (
+              <Option key={category.id} value={category.name}>
+                {category.name}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -108,7 +148,13 @@ export default function CreatePost() {
           name="id_company"
           rules={[{ required: true, message: 'Please input the company ID!' }]}
         >
-          <Input />
+    <Select placeholder="Select a company" style={{ width: '100%' }}>
+            {companies.map((company) => (
+              <Option key={company.id} value={company.id}>
+                {company.nom}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -116,8 +162,14 @@ export default function CreatePost() {
           name="img"
           rules={[{ required: true, message: 'Please select an image!' }]}
         >
-          <Input type='file' onChange={handleImageChange} />
-          {imagePreview && <img src={imagePreview} alt="Preview" style={{ maxWidth: '100px', marginTop: '10px' }} />}
+          <Input type="file" onChange={handleImageChange} />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              style={{ maxWidth: '100px', marginTop: '10px' }}
+            />
+          )}
         </Form.Item>
 
         <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
