@@ -158,9 +158,7 @@ export default function AllCompanies() {
             <Form.Item name="nom" label="Name">
               <Input />
             </Form.Item>
-            <Form.Item name="img" label="Image URL">
-              <Input />
-            </Form.Item>
+
             <Form.Item name="location" label="Location">
               <Input />
             </Form.Item>
